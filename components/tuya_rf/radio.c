@@ -35,7 +35,7 @@ static const uint8_t frequency_bank_433[CMT2300A_FREQUENCY_BANK_SIZE] = {
 };
 
 static const uint8_t frequency_bank_315[CMT2300A_FREQUENCY_BANK_SIZE] = {
-    0x48, 0xD2, 0x1E, 0x5C,
+    0x48, 0xD3, 0x1E, 0x5C,
     0x48, 0xB1, 0x13, 0x1B
 };
 
