@@ -35,7 +35,7 @@ static const uint8_t frequency_bank_433[CMT2300A_FREQUENCY_BANK_SIZE] = {
 };
 
 static const uint8_t frequency_bank_315[CMT2300A_FREQUENCY_BANK_SIZE] = {
-    0x48, 0xD3, 0x1E, 0x5C,
+    0x48, 0xD2, 0x1E, 0x5C,
     0x48, 0xB1, 0x13, 0x1B
 };
 
@@ -49,6 +49,9 @@ uint8_t RF_GetFrequencyBand(void)
     return rf_frequency_band;
 }
 
+static const uint8_t system_bank_315[CMT2300A_SYSTEM_BANK_SIZE] = { 0xAE, 0xE0, 0x30, 0x00, 0x00, 0xF4, 0x10, 0xE2, 0x42, 0x20, 0x00, 0x81 };
+static const uint8_t tx_bank_315[CMT2300A_TX_BANK_SIZE] = { 0x55, 0xE7, 0x12, 0x00, 0x0F, 0xB0, 0x00, 0x49, 0x12, 0x3F, 0x7F };
+
 int RF_Init(void)
 {
     uint8_t tmp;
@@ -61,11 +64,11 @@ int RF_Init(void)
     
     /* Config registers */
     CMT2300A_ConfigRegBank(CMT2300A_CMT_BANK_ADDR       , g_cmt2300aCmtBank       , CMT2300A_CMT_BANK_SIZE       );
-    CMT2300A_ConfigRegBank(CMT2300A_SYSTEM_BANK_ADDR    , g_cmt2300aSystemBank    , CMT2300A_SYSTEM_BANK_SIZE    );
-    CMT2300A_ConfigRegBank(CMT2300A_FREQUENCY_BANK_ADDR , frequency_bank           , CMT2300A_FREQUENCY_BANK_SIZE );
+    CMT2300A_ConfigRegBank(CMT2300A_SYSTEM_BANK_ADDR, rf_frequency_band ? system_bank_315 : g_cmt2300aSystemBank, CMT2300A_SYSTEM_BANK_SIZE);
+    CMT2300A_ConfigRegBank(CMT2300A_FREQUENCY_BANK_ADDR, rf_frequency_band ? frequency_bank_315 : g_cmt2300aFrequencyBank, CMT2300A_FREQUENCY_BANK_SIZE);
     CMT2300A_ConfigRegBank(CMT2300A_DATA_RATE_BANK_ADDR , g_cmt2300aDataRateBank  , CMT2300A_DATA_RATE_BANK_SIZE );
     CMT2300A_ConfigRegBank(CMT2300A_BASEBAND_BANK_ADDR  , g_cmt2300aBasebandBank  , CMT2300A_BASEBAND_BANK_SIZE  );
-    CMT2300A_ConfigRegBank(CMT2300A_TX_BANK_ADDR        , g_cmt2300aTxBank        , CMT2300A_TX_BANK_SIZE        );
+    CMT2300A_ConfigRegBank(CMT2300A_TX_BANK_ADDR, rf_frequency_band ? tx_bank_315 : g_cmt2300aTxBank, CMT2300A_TX_BANK_SIZE);
     
     // xosc_aac_code[2:0] = 2
     tmp = (~0x07) & CMT2300A_ReadReg(CMT2300A_CUS_CMT10);
