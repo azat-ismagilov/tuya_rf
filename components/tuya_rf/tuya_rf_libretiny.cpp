@@ -338,10 +338,16 @@ void TuyaRfComponent::loop() {
             ESP_LOGVV(TAG, "Not receiving, ignoring ending pulse (%u)",diff);
           }
         } else if (diff<this->start_pulse_max_us_) {
-          //it's a new start pulse, discard old data and start again
-          ESP_LOGVV(TAG, "Long pulse (%u), start reception",diff);
-          s.buffer_read_at=prev;
-          receive_started_=true;
+          if (receive_started_) {
+            ESP_LOGVV(TAG, "Long pulse (%u), end previous frame", diff);
+            receive_end = true;
+            new_write_at = prev;
+            break;
+          } else {
+            ESP_LOGVV(TAG, "Long pulse (%u), start reception", diff);
+            s.buffer_read_at = prev;
+            receive_started_ = true;
+          }
         } else {
           ESP_LOGVV(TAG, "Starting pulse (%u) too long, ignored",diff);
         }
