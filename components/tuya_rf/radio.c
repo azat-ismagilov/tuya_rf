@@ -22,9 +22,39 @@
 #include "cmt2300a_hal.h"
 #include "cmt2300a_params_captured.h"
 
+/*
+ * RF band:
+ *   0 = original 433.92 MHz configuration
+ *   1 = experimental 315 MHz configuration
+ */
+static uint8_t rf_frequency_band = 0;
+
+static const uint8_t frequency_bank_433[CMT2300A_FREQUENCY_BANK_SIZE] = {
+    0x42, 0x71, 0xCE, 0x1C,
+    0x42, 0x5B, 0x1C, 0x1C
+};
+
+static const uint8_t frequency_bank_315[CMT2300A_FREQUENCY_BANK_SIZE] = {
+    0x48, 0xD2, 0x1E, 0x5C,
+    0x48, 0xB1, 0x13, 0x1B
+};
+
+void RF_SetFrequencyBand(uint8_t band)
+{
+    rf_frequency_band = band ? 1 : 0;
+}
+
+uint8_t RF_GetFrequencyBand(void)
+{
+    return rf_frequency_band;
+}
+
 int RF_Init(void)
 {
     uint8_t tmp;
+
+    const uint8_t *frequency_bank =
+        rf_frequency_band ? frequency_bank_315 : frequency_bank_433;
     
     CMT2300A_InitGpio();
 	CMT2300A_Init();
@@ -32,7 +62,7 @@ int RF_Init(void)
     /* Config registers */
     CMT2300A_ConfigRegBank(CMT2300A_CMT_BANK_ADDR       , g_cmt2300aCmtBank       , CMT2300A_CMT_BANK_SIZE       );
     CMT2300A_ConfigRegBank(CMT2300A_SYSTEM_BANK_ADDR    , g_cmt2300aSystemBank    , CMT2300A_SYSTEM_BANK_SIZE    );
-    CMT2300A_ConfigRegBank(CMT2300A_FREQUENCY_BANK_ADDR , g_cmt2300aFrequencyBank , CMT2300A_FREQUENCY_BANK_SIZE );
+    CMT2300A_ConfigRegBank(CMT2300A_FREQUENCY_BANK_ADDR , frequency_bank           , CMT2300A_FREQUENCY_BANK_SIZE );
     CMT2300A_ConfigRegBank(CMT2300A_DATA_RATE_BANK_ADDR , g_cmt2300aDataRateBank  , CMT2300A_DATA_RATE_BANK_SIZE );
     CMT2300A_ConfigRegBank(CMT2300A_BASEBAND_BANK_ADDR  , g_cmt2300aBasebandBank  , CMT2300A_BASEBAND_BANK_SIZE  );
     CMT2300A_ConfigRegBank(CMT2300A_TX_BANK_ADDR        , g_cmt2300aTxBank        , CMT2300A_TX_BANK_SIZE        );

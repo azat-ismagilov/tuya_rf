@@ -30,6 +30,10 @@ extern "C" {
 int StartTx(void);
 int StartRx(void);
 
+/* 0 = 433.92 MHz, 1 = 315 MHz */
+void RF_SetFrequencyBand(uint8_t band);
+uint8_t RF_GetFrequencyBand(void);
+
 #ifdef __cplusplus 
 } 
 #endif

@@ -58,6 +58,9 @@ class TuyaRfComponent : public remote_base::RemoteTransmitterBase,
   void turn_on_receiver();
   void turn_off_receiver();
 
+  void set_frequency_mhz(float mhz);
+  float get_frequency_mhz() const { return this->frequency_mhz_; }
+
  protected:
   void send_internal(uint32_t send_times, uint32_t send_wait) override;
 
@@ -88,6 +91,8 @@ class TuyaRfComponent : public remote_base::RemoteTransmitterBase,
   bool transmitting_{false};
   bool receive_started_{false};
   uint32_t old_write_at_{0};
+
+  float frequency_mhz_{433.92f};
 };
 
 }  // namespace tuya_rf

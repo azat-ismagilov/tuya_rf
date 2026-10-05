@@ -47,6 +47,42 @@ void TuyaRfComponent::turn_off_receiver() {
    }
 }
 
+void TuyaRfComponent::set_frequency_mhz(float mhz) {
+  uint8_t band;
+  float selected;
+
+  if (mhz > 310.0f && mhz < 320.0f) {
+    band = 1;
+    selected = 315.0f;
+  } else if (mhz > 430.0f && mhz < 440.0f) {
+    band = 0;
+    selected = 433.92f;
+  } else {
+    ESP_LOGE(TAG, "Unsupported RF frequency %.3f MHz; use 315 or 433.92", mhz);
+    return;
+  }
+
+  if (RF_GetFrequencyBand() == band) {
+    this->frequency_mhz_ = selected;
+    ESP_LOGD(TAG, "RF frequency already %.2f MHz", selected);
+    return;
+  }
+
+  bool restart_receiver =
+      !this->receiver_disabled_ && !this->transmitting_;
+
+  if (restart_receiver)
+    this->set_receiver(false);
+
+  RF_SetFrequencyBand(band);
+  this->frequency_mhz_ = selected;
+
+  ESP_LOGI(TAG, "RF frequency switched to %.2f MHz", selected);
+
+  if (restart_receiver)
+    this->set_receiver(true);
+}
+
 void TuyaRfComponent::set_receiver(bool on) {
   if (on) {
     ESP_LOGD(TAG, "starting receiver");
@@ -109,6 +145,7 @@ void TuyaRfComponent::dump_config() {
   LOG_PIN("  Fcsb Pin: ",this->fcsb_pin_);
   LOG_PIN("  Tx Pin: ",this->RemoteTransmitterBase::pin_);
   LOG_PIN("  Rx Pin: ", this->RemoteReceiverBase::pin_);
+  ESP_LOGCONFIG(TAG, "  RF Frequency: %.2f MHz", this->frequency_mhz_);
   //probably the warning isn't useful due to the noisy signal
   if (!this->RemoteReceiverBase::pin_->digital_read()) {
     ESP_LOGW(TAG, "Remote Receiver Signal starts with a HIGH value. Usually this means you have to "
